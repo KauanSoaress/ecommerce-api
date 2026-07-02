@@ -1,6 +1,7 @@
-from src.config import CONFIG
 from sqlalchemy import text
+from src.config import CONFIG
 from sqlalchemy.ext.asyncio import create_async_engine
+from src.db.models import Base, User
 
 DB_URL = f"postgresql+asyncpg://{CONFIG.DATABASE_USER}:{CONFIG.DATABASE_PASSWORD}@postgres:5432/{CONFIG.DATABASE_NAME}"
 
@@ -11,6 +12,5 @@ engine = create_async_engine(
 
 async def init_db():
     async with engine.begin() as conn:
-        statement = text("""SELECT 'Database Initialized'""")
-        result = await conn.execute(statement)
-        print(result.all())
+        await conn.run_sync(Base.metadata.create_all)
+        print("Database initialized successfully.")

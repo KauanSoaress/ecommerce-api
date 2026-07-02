@@ -1,0 +1,37 @@
+services:
+  api:
+    build: .
+    container_name: ecommerce-api
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    restart: always
+
+    ports:
+      - "8000:8000"
+  postgres:
+    image: postgres:17
+    container_name: ecommerce-db
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    restart: always
+
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports: 
+      - "5432:5432"
+
+    volumes:
+      - ecommerce_db_data:/var/lib/postgresql/data
+
+volumes:
+  ecommerce_db_data:

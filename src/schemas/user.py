@@ -28,5 +28,5 @@ class UserOut(UserBase):
 
 
 class UserLogin(BaseModel):
-    username: str
+    email: str
     password: str

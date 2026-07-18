@@ -11,4 +11,6 @@ class Settings(BaseSettings):
     DATABASE_NAME: str
     DATABASE_PASSWORD: str
 
+    SECRET_KEY: str
+
 CONFIG = Settings()

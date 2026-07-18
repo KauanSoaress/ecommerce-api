@@ -1,11 +1,10 @@
-from sqlalchemy import select
-from src.api.deps import get_db
 from src.db.models.users import User
 from sqlalchemy.exc import IntegrityError
 from src.core.security import hash_password
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.schemas.user import UserCreate, UserOut, UserUpdate
 from fastapi import APIRouter, Depends, HTTPException, status
+from src.api.deps import get_db, get_current_user, get_current_admin_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -28,12 +27,20 @@ async def create_user(payload: UserCreate, db: AsyncSession = Depends(get_db)):
             detail="Username or email already registered.",
         )
 
+@router.get("/me", response_model=UserOut)
+async def get_current_user_profile(current_user: User = Depends(get_current_user)):
+    return current_user
+
 @router.get(
     "/{user_id}",
     response_model=UserOut,
     status_code=status.HTTP_200_OK
 )
-async def get_user_by_id(user_id: int, db: AsyncSession = Depends(get_db)):
+async def get_user_by_id(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
     user = await db.get(User, user_id)
 
     if not user:
@@ -51,7 +58,8 @@ async def get_user_by_id(user_id: int, db: AsyncSession = Depends(get_db)):
 async def update_user_by_id(
     user_id: int,
     payload: UserUpdate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
 ):
     user = await db.get(User, user_id)
 
@@ -85,7 +93,11 @@ async def update_user_by_id(
     "/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT
 )
-async def delete_user_by_id(user_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_user_by_id(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
     user = await db.get(User, user_id)
 
     if not user:

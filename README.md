@@ -35,3 +35,8 @@ uv run fastapi deploy
 ```bash
 docker exec -it ecommerce-db psql -U postgres
 ```
+
+## Generete a secret key
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```

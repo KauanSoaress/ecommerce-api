@@ -29,3 +29,9 @@ uv run fastapi deploy
 
 - [FastAPI Documentation](https://fastapi.tiangolo.com)
 - [FastAPI Cloud](https://fastapicloud.com)
+
+
+## Access DB docker
+```bash
+docker exec -it ecommerce-db psql -U postgres
+```

@@ -1,15 +1,12 @@
-from fastapi import FastAPI
-from src.db.connection import init_db
 from contextlib import asynccontextmanager
+from fastapi import FastAPI
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Initializing database...")
-    await init_db()
+    print("Starting application...")
     yield
-
-    print("Shutting down application...")
+    print("Stopping application...")
 
 app = FastAPI(
     lifespan=lifespan,

@@ -1,0 +1,32 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.db.models.orders import Order
+    from src.db.models.products import Product
+
+from src.db.base import Base
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    price: Mapped[float] = mapped_column(nullable=False)
+    quantity: Mapped[int] = mapped_column(nullable=False)
+
+    order: Mapped["Order"] = relationship(back_populates="order_items", passive_deletes=True)
+    product: Mapped["Product"] = relationship(back_populates="order_items")
+
+    def __repr__(self) -> str:
+        return f"OrderItem(id={self.id!r}, order_id={self.order_id!r}, product_id={self.product_id!r}, price={self.price!r}, quantity={self.quantity!r})"

@@ -40,3 +40,10 @@ docker exec -it ecommerce-db psql -U postgres
 ```bash
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
+
+## Create and apply a migration
+```bash
+alembic revision --autogenerate -m "Create initial schema"
+
+alembic upgrade head
+```

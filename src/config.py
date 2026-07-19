@@ -12,5 +12,7 @@ class Settings(BaseSettings):
     DATABASE_PASSWORD: str
 
     SECRET_KEY: str
+    FIRST_ADMIN_EMAIL: str
+    FIRST_ADMIN_PASSWORD: str
 
 CONFIG = Settings()

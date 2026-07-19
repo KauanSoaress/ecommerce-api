@@ -3,7 +3,10 @@ from src.api.deps import get_db
 from src.schemas.auth import Token
 from src.db.models.users import User
 from src.schemas.user import UserLogin
+from sqlalchemy.exc import IntegrityError
+from src.core.security import hash_password
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.schemas.user import UserRegister, UserOut
 from fastapi import APIRouter, Depends, HTTPException, status
 from src.core.security import create_access_token, verify_password
 
@@ -21,3 +24,32 @@ async def login(payload: UserLogin, db: AsyncSession = Depends(get_db)):
         )
     access_token = create_access_token(data={"sub": str(user.id)})
     return Token(access_token=access_token)
+
+@router.post(
+    "/register",
+    response_model=UserOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register"
+)
+async def create_user(
+    payload: UserRegister,
+    db: AsyncSession = Depends(get_db)
+):
+    user = User(
+        username=payload.username,
+        email=payload.email,
+        hashed_password=hash_password(payload.password),
+        is_admin=False
+    )
+    db.add(user)
+
+    try:
+        await db.commit()
+        await db.refresh(user)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username or email already registered.",
+        )
+    return user

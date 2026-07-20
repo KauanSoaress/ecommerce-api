@@ -2,34 +2,67 @@
 
 A project to build an e-commerce API with FastAPI.
 
-## Quick Start
+## How to run the project
 
-### Start the development server
+### 1. Clone the repository
 
 ```bash
-uv run fastapi dev
+git clone https://github.com/KauanSoaress/ecommerce-api.git
+cd ecommerce-api
 ```
 
-Visit http://localhost:8000
-
-### Deploy to FastAPI Cloud
-
-Sign up and log in at https://fastapicloud.com, then deploy with:
+### 2. Create a copy of `.env.example` and fill in the required environment variables
 
 ```bash
-uv run fastapi deploy
+cp .env.example .env
+```
+
+### 3. Create the virtual environment and install the dependencies
+
+This project uses **uv**.
+
+```bash
+uv venv
+source .venv/bin/activate   # Linux/macOS
+uv sync
+```
+
+### 4. Start the PostgreSQL container
+
+```bash
+docker compose up -d postgres
+```
+
+> Or, if you prefer to start the entire application:
+
+```bash
+docker compose up --build
+```
+
+### 5. Apply the database migrations
+
+```bash
+alembic upgrade head
+```
+
+### 6. Start the application
+
+If you only started PostgreSQL in step 4:
+
+```bash
+docker compose up --build
+```
+
+If the application was already running, simply restart it:
+
+```bash
+docker compose restart ecommerce-api
 ```
 
 ## Project Structure
 
 - `main.py` - Your FastAPI application
 - `pyproject.toml` - Project dependencies
-
-## Learn More
-
-- [FastAPI Documentation](https://fastapi.tiangolo.com)
-- [FastAPI Cloud](https://fastapicloud.com)
-
 
 ## Access DB docker
 ```bash
@@ -41,9 +74,9 @@ docker exec -it ecommerce-db psql -U postgres
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-## Create and apply a migration
+## Create and apply a migration (After any table change)
 ```bash
-alembic revision --autogenerate -m "Create initial schema"
+alembic revision --autogenerate -m "message"
 
 alembic upgrade head
 ```

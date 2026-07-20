@@ -59,22 +59,19 @@ If the application was already running, simply restart it:
 docker compose restart ecommerce-api
 ```
 
-## Project Structure
+## Utilities
 
-- `main.py` - Your FastAPI application
-- `pyproject.toml` - Project dependencies
-
-## Access DB docker
+### Access DB docker
 ```bash
 docker exec -it ecommerce-db psql -U postgres
 ```
 
-## Generete a secret key
+### Generate a secret key
 ```bash
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-## Create and apply a migration (After any table change)
+### Create and apply a migration (After any table change)
 ```bash
 alembic revision --autogenerate -m "message"
 

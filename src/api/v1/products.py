@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from src.db.models.users import User
+from sqlalchemy.exc import IntegrityError
 from src.db.models.products import Product
 from src.db.models.categories import Category
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -87,9 +88,15 @@ async def create_product(
 
     db.add(product)
 
-    
-    await db.commit()
-    await db.refresh(product)
+    try:
+        await db.commit()
+        await db.refresh(product)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A product with this name already exists.",
+        )
     
     return product
 
@@ -150,8 +157,15 @@ async def update_product(
     for field, value in update_data.items():
         setattr(product, field, value)
     
-    await db.commit()
-    await db.refresh(product)
+    try:
+        await db.commit()
+        await db.refresh(product)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A product with this name already exists.",
+        )
 
     return product
 
@@ -202,4 +216,4 @@ async def delete_product(
         )
 
     await db.delete(product)
-    db.commit()
+    await db.commit()

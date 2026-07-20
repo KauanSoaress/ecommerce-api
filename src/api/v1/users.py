@@ -179,8 +179,15 @@ async def update_user_by_id(
     for field, value in update_data.items():
         setattr(user, field, value)
     
-    await db.commit()
-    await db.refresh(user)
+    try:
+        await db.commit()
+        await db.refresh(user)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username or email already registered.",
+        )
 
     return user
 

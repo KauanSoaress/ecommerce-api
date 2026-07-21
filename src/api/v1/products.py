@@ -3,9 +3,10 @@ from src.db.models.users import User
 from sqlalchemy.exc import IntegrityError
 from src.db.models.products import Product
 from src.db.models.categories import Category
+from src.services.storage import upload_image
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException, status
 from src.api.deps import get_db, get_current_user, get_current_admin_user
+from fastapi import APIRouter, Depends, File, HTTPException, status, UploadFile
 from src.schemas.product import ProductCreate, ProductOut, ProductUpdate, ProductStockUpdate
 
 router = APIRouter(prefix='/products', tags=["products"])
@@ -51,7 +52,8 @@ async def get_products(
     description="Create a new product"
 )
 async def create_product(
-    payload: ProductCreate,
+    payload: ProductCreate = Depends(ProductCreate.as_form),
+    file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_admin_user)
 ):
@@ -77,13 +79,15 @@ async def create_product(
             detail="A product with this name already exists."
         )
 
+    url = await upload_image(file)
+
     product = Product(
         name=payload.name,
         description=payload.description,
         price=payload.price,
         stock=payload.stock,
         category_id=payload.category_id,
-        image_url=str(payload.image_url)
+        image_url=url
     )
 
     db.add(product)
@@ -95,7 +99,7 @@ async def create_product(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="A product with this name already exists.",
+            detail="Database integrity error.",
         )
     
     return product

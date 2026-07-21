@@ -12,7 +12,12 @@ class Settings(BaseSettings):
     DATABASE_PASSWORD: str
 
     SECRET_KEY: str
+
     FIRST_ADMIN_EMAIL: str
     FIRST_ADMIN_PASSWORD: str
+
+    CLOUDINARY_CLOUD_NAME: str
+    CLOUDINARY_API_KEY: str
+    CLOUDINARY_API_SECRET: str
 
 CONFIG = Settings()

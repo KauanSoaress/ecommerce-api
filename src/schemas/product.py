@@ -1,3 +1,4 @@
+from fastapi import Form
 from decimal import Decimal
 from pydantic import BaseModel, Field, HttpUrl, ConfigDict
 
@@ -12,7 +13,7 @@ class ProductCreate(BaseModel):
         max_length=200,
         description="A brief description of the product"
     )
-    price: float = Field(
+    price: Decimal = Field(
         ...,
         gt=0,
         description="The price of the product, must be greater than 0"
@@ -27,10 +28,23 @@ class ProductCreate(BaseModel):
         gt=0,
         description="The ID of the category this product belongs to"
     )
-    image_url: HttpUrl = Field(
-        ...,
-        description="URL of the product image"
-    )
+
+    @classmethod
+    def as_form(
+        cls,
+        name: str = Form(...),
+        description: str | None = Form(None),
+        price: Decimal = Form(...),
+        stock: int = Form(...),
+        category_id: int = Form(...),
+    ):
+        return cls(
+            name=name,
+            description=description,
+            price=price,
+            stock=stock,
+            category_id=category_id,
+        )
 
 class ProductUpdate(BaseModel):
     name: str | None = Field(
@@ -44,7 +58,7 @@ class ProductUpdate(BaseModel):
         max_length=200,
         description="A brief description of the product"
     )
-    price: float | None = Field(
+    price: Decimal | None = Field(
         None,
         gt=0,
         description="The price of the product, must be greater than 0"
@@ -59,10 +73,23 @@ class ProductUpdate(BaseModel):
         gt=0,
         description="The ID of the category this product belongs to"
     )
-    image_url: HttpUrl | None = Field(
-        None,
-        description="URL of the product image"
-    )
+    
+    @classmethod
+    def as_form(
+        cls,
+        name: str | None = Form(None),
+        description: str | None = Form(None),
+        price: Decimal | None = Form(None),
+        stock: int | None = Form(None),
+        category_id: int | None = Form(None),
+    ):
+        return cls(
+            name=name,
+            description=description,
+            price=price,
+            stock=stock,
+            category_id=category_id,
+        )
 
 class ProductStockUpdate(BaseModel):
     stock: int = Field(
@@ -78,6 +105,7 @@ class ProductOut(BaseModel):
     price: Decimal
     stock: int
     category_id: int
-    image_url: HttpUrl | None
+    image_url: HttpUrl
+    image_public_id: str
 
     model_config = ConfigDict(from_attributes=True)

@@ -4,8 +4,9 @@ from sqlalchemy.exc import IntegrityError
 from src.db.models.products import Product
 from src.db.models.categories import Category
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException, status
+from src.services.storage import upload_image, update_image, delete_image
 from src.api.deps import get_db, get_current_user, get_current_admin_user
+from fastapi import APIRouter, Depends, File, HTTPException, status, UploadFile
 from src.schemas.product import ProductCreate, ProductOut, ProductUpdate, ProductStockUpdate
 
 router = APIRouter(prefix='/products', tags=["products"])
@@ -51,7 +52,8 @@ async def get_products(
     description="Create a new product"
 )
 async def create_product(
-    payload: ProductCreate,
+    payload: ProductCreate = Depends(ProductCreate.as_form),
+    file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_admin_user)
 ):
@@ -77,13 +79,16 @@ async def create_product(
             detail="A product with this name already exists."
         )
 
+    url, public_id = await upload_image(file)
+
     product = Product(
         name=payload.name,
         description=payload.description,
         price=payload.price,
         stock=payload.stock,
         category_id=payload.category_id,
-        image_url=str(payload.image_url)
+        image_url=url,
+        image_public_id=public_id
     )
 
     db.add(product)
@@ -95,7 +100,7 @@ async def create_product(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="A product with this name already exists.",
+            detail="Database integrity error.",
         )
     
     return product
@@ -109,7 +114,8 @@ async def create_product(
 )
 async def update_product(
     product_id: int,
-    payload: ProductUpdate,
+    payload: ProductUpdate = Depends(ProductUpdate.as_form),
+    file: UploadFile = File(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_admin_user)
 ):
@@ -121,9 +127,12 @@ async def update_product(
             detail="Product not found."
         )
     
-    update_data = payload.model_dump(exclude_unset=True)
+    update_data = payload.model_dump(
+        exclude_unset=True,
+        exclude_none=True
+    )
 
-    if not update_data:
+    if not update_data and not file:
         return product
 
     if "name" in update_data:
@@ -150,13 +159,15 @@ async def update_product(
                 status_code=404,
                 detail="Category not found."
             )
-        
-    if "image_url" in update_data:
-        update_data["image_url"] = str(update_data["image_url"])
 
     for field, value in update_data.items():
         setattr(product, field, value)
-    
+
+    if file:
+        url, public_id = await update_image(file, product.image_public_id)
+        product.image_url = url
+        product.image_public_id = public_id
+
     try:
         await db.commit()
         await db.refresh(product)
@@ -214,6 +225,9 @@ async def delete_product(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Product not found."
         )
+    
+    if product.image_public_id:
+        await delete_image(product.image_public_id)
 
     await db.delete(product)
     await db.commit()

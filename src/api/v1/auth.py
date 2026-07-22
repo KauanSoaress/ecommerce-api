@@ -14,7 +14,24 @@ from src.db.models.users import User
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/login", response_model=Token)
-async def login(payload: UserLogin, db: AsyncSession = Depends(get_db)):
+async def login(
+    payload: Annotated[
+        UserLogin,
+        Body(
+            openapi_examples={
+                "default": {
+                    "summary": "A normal example",
+                    "description": "A **normal** item works correctly.",
+                    "value": {
+                        "email": "email@email.com",
+                        "password": "password",
+                    },
+                },
+            },
+        )
+    ],
+    db: AsyncSession = Depends(get_db)
+):
     result = await db.execute(select(User).where(User.email == payload.email))
     user = result.scalar_one_or_none()
 

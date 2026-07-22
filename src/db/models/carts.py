@@ -17,11 +17,12 @@ class Cart(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(
         ForeignKey("auth_users.id", ondelete="CASCADE"),
-        nullable=False
+        nullable=False,
+        unique=True
     )
     created_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now())
 
-    user: Mapped["User"] = relationship(back_populates="carts", passive_deletes=True)
+    user: Mapped["User"] = relationship(back_populates="cart", passive_deletes=True)
     cart_items: Mapped[list["CartItem"]] = relationship(back_populates="cart", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:

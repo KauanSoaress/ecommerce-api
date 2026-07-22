@@ -22,7 +22,11 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now(), onupdate=func.now())
     is_admin: Mapped[bool] = mapped_column(nullable=False, default=False)
 
-    carts: Mapped[list["Cart"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    cart: Mapped["Cart"] = relationship(
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
     orders: Mapped[list["Order"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",

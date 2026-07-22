@@ -24,7 +24,9 @@ class Product(Base):
         ForeignKey("categories.id", ondelete="CASCADE"),
         nullable=False
     )
-    image_url: Mapped[str] = mapped_column(nullable=True)
+    image_url: Mapped[str] = mapped_column(nullable=False)
+    image_public_id: Mapped[str] = mapped_column(nullable=False)
+
     created_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now())
 
     category: Mapped["Category"] = relationship("Category", back_populates="products")

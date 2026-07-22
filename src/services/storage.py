@@ -34,4 +34,21 @@ async def upload_image(file: UploadFile) -> str:
             detail=f"Error uploading image: {str(e)}"
         )
 
-    return result['secure_url']
+    return result['secure_url'], result['public_id']
+
+async def update_image(file: UploadFile, old_image_public_id: str) -> tuple[str, str]:
+    await delete_image(old_image_public_id)
+    return await upload_image(file)
+
+async def delete_image(image_public_id: str) -> None:
+    print(image_public_id)  # Debugging line to check the public_id
+    try:
+        cloudinary.uploader.destroy(
+            image_public_id,
+            resource_type="image"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting image: {str(e)}"
+        )

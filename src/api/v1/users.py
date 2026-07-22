@@ -1,12 +1,14 @@
 from sqlalchemy import select
 from sqlite3 import IntegrityError
-from src.db.models.users import User
 from sqlalchemy.exc import IntegrityError
 from src.core.security import hash_password
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.schemas.user import UserCreate, UserOut, UserUpdate
 from fastapi import APIRouter, Depends, HTTPException, status
 from src.api.deps import get_db, get_current_user, get_current_admin_user
+
+from src.schemas.user import UserCreate, UserOut, UserUpdate
+
+from src.db.models.users import User
 
 router = APIRouter(prefix="/users", tags=["users"])
 

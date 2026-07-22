@@ -1,14 +1,15 @@
+from typing import Annotated
 from sqlalchemy import select
 from src.api.deps import get_db
-from src.schemas.auth import Token
-from src.db.models.users import User
-from src.schemas.user import UserLogin
 from sqlalchemy.exc import IntegrityError
-from src.core.security import hash_password
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.schemas.user import UserRegister, UserOut
-from fastapi import APIRouter, Depends, HTTPException, status
-from src.core.security import create_access_token, verify_password
+from fastapi import APIRouter, Depends, HTTPException, status, Body
+from src.core.security import create_access_token, verify_password, hash_password
+
+from src.schemas.auth import Token
+from src.schemas.user import UserRegister, UserOut, UserLogin
+
+from src.db.models.users import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

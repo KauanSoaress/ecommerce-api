@@ -1,13 +1,13 @@
 # src/api/deps.py
 from sqlalchemy import select
 from typing import AsyncGenerator
-from src.db.models.users import User
 from src.db.connection import async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.security import decode_access_token
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
+from src.db.models.users import User
 
 bearer_scheme = HTTPBearer()
 

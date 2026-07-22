@@ -41,7 +41,6 @@ async def update_image(file: UploadFile, old_image_public_id: str) -> tuple[str,
     return await upload_image(file)
 
 async def delete_image(image_public_id: str) -> None:
-    print(image_public_id)  # Debugging line to check the public_id
     try:
         cloudinary.uploader.destroy(
             image_public_id,

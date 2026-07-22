@@ -1,13 +1,16 @@
 from slugify import slugify
 from sqlalchemy import select
-from src.db.models.users import User
 from sqlalchemy.exc import IntegrityError
-from src.db.models.products import Product
-from src.db.models.categories import Category
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, HTTPException, status
 from src.api.deps import get_db, get_current_user, get_current_admin_user
+
 from src.schemas.category import CategoryCreate, CategoryUpdate, CategoryOut
+
+from src.db.models.users import User
+from src.db.models.products import Product
+from src.db.models.categories import Category
+
 
 router = APIRouter(prefix='/categories', tags=["categories"])
 

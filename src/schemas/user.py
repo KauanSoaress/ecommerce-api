@@ -11,6 +11,7 @@ class UserBase(BaseModel):
 class UserRegister(UserBase):
     password: str = Field(min_length=8, max_length=72)
 
+
 class UserCreate(UserBase):
     password: str = Field(min_length=8, max_length=72)
     is_admin: bool = False

@@ -1,13 +1,15 @@
 from sqlalchemy import select
-from src.db.models.users import User
 from sqlalchemy.exc import IntegrityError
-from src.db.models.products import Product
-from src.db.models.categories import Category
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.services.storage import upload_image, update_image, delete_image
 from src.api.deps import get_db, get_current_user, get_current_admin_user
 from fastapi import APIRouter, Depends, File, HTTPException, status, UploadFile
+
 from src.schemas.product import ProductCreate, ProductOut, ProductUpdate, ProductStockUpdate
+
+from src.db.models.users import User
+from src.db.models.products import Product
+from src.db.models.categories import Category
 
 router = APIRouter(prefix='/products', tags=["products"])
 

@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 from src.db.base import Base
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from decimal import Decimal
 
 
 class CartItem(Base):
@@ -27,6 +28,10 @@ class CartItem(Base):
 
     cart: Mapped["Cart"] = relationship(back_populates="cart_items", passive_deletes=True)
     product: Mapped["Product"] = relationship(back_populates="cart_items")
+
+    @property
+    def subtotal(self) -> Decimal:
+        return Decimal(str(self.product.price)) * self.quantity
 
     def __repr__(self) -> str:
         return f"CartItem(id={self.id!r}, cart_id={self.cart_id!r}, product_id={self.product_id!r}, quantity={self.quantity!r})"

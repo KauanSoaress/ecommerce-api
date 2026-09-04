@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from src.schemas.cart_item import CartItemOut
 
 
@@ -8,5 +8,5 @@ class CartOut(BaseModel):
     id: int
     user_id: int
     created_at: datetime
-    items: list["CartItemOut"] = []
+    cart_items: list[CartItemOut] = Field(default_factory=list)
     total_value: float = 0.0

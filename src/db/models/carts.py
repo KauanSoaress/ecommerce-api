@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -25,6 +26,10 @@ class Cart(Base):
 
     user: Mapped["User"] = relationship(back_populates="cart", passive_deletes=True)
     cart_items: Mapped[list["CartItem"]] = relationship(back_populates="cart", cascade="all, delete-orphan")
+
+    @property
+    def total_value(self) -> Decimal:
+        return sum(item.subtotal for item in self.cart_items)
 
     def __repr__(self) -> str:
         return f"Cart(id={self.id!r}, user_id={self.user_id!r}, created_at={self.created_at!r})"

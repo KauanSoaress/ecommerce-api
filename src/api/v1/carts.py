@@ -5,13 +5,14 @@ from src.services.cart import get_or_create_cart
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.schemas.cart import CartOut
-from src.schemas.cart_item import CartItemCreate, CartItemOut
+from src.schemas.cart_item import CartItemCreate, CartItemOut, CartItemUpdate
 
 from src.db.models.users import User
 from src.db.models.products import Product
 from src.db.models.cart_items import CartItem
 
 router = APIRouter(prefix='/cart', tags=["cart"])
+
 
 @router.get(
     "/",
@@ -28,6 +29,7 @@ async def get_cart(
     await db.commit()
     await db.refresh(cart)
     return cart
+
 
 @router.post(
     "/items",
@@ -49,7 +51,7 @@ async def add_cart_item(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Product not found."
         )
-    
+
     result = await db.execute(
         select(CartItem).where(
             CartItem.cart_id == cart.id,
@@ -76,6 +78,7 @@ async def add_cart_item(
             product_id=payload.product_id,
             quantity=payload.quantity
         )
+        cart.cart_items.append(item)
         db.add(item)
 
     await db.commit()
@@ -88,3 +91,91 @@ async def add_cart_item(
         quantity=item.quantity,
         subtotal=item.quantity * product.price
     )
+
+
+@router.patch(
+    "/items/{item_id}",
+    response_model=CartItemOut,
+    status_code=status.HTTP_200_OK,
+    summary="Update item",
+    description="Update the quantity of a specific item in the cart"
+)
+async def update_cart_item(
+    item_id: int,
+    payload: CartItemUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    cart = await get_or_create_cart(db, current_user)
+
+    result = await db.execute(
+        select(CartItem).where(
+            CartItem.cart_id == cart.id,
+            CartItem.id == item_id
+        )
+    )
+
+    item = result.scalar_one_or_none()
+
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cart item not found."
+        )
+
+    update_data = payload.model_dump(
+        exclude_unset=True,
+        exclude_none=True
+    )
+
+    if not update_data:
+        return item
+
+    product = await db.get(Product, item.product_id)
+
+    if "quantity" in update_data:
+        if update_data["quantity"] > product.stock:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Requested quantity exceeds available stock."
+            )
+
+    for key, value in update_data.items():
+        setattr(item, key, value)
+
+    await db.commit()
+    await db.refresh(item)
+
+    return item
+
+
+@router.delete(
+    "/items/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete item from cart",
+    description="Deletes an item from the cart associated with the current user."
+)
+async def delete_cart_item(
+    item_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    cart = await get_or_create_cart(db, current_user)
+
+    result = await db.execute(
+        select(CartItem).where(
+            CartItem.cart_id == cart.id,
+            CartItem.id == item_id
+        )
+    )
+
+    item = result.scalar_one_or_none()
+
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cart item not found."
+        )
+
+    await db.delete(item)
+    await db.commit()

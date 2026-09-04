@@ -63,7 +63,7 @@ docker compose restart ecommerce-api
 
 ### Access DB docker
 ```bash
-docker exec -it ecommerce-db psql -U postgres
+docker exec -it ecommerce-db psql -U <DATABASE_USER>
 ```
 
 ### Generate a secret key

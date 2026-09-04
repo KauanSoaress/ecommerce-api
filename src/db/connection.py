@@ -1,7 +1,5 @@
 from src.config import CONFIG
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from src.db.base import Base
-from src.db import models
 
 DB_URL = f"postgresql+asyncpg://{CONFIG.DATABASE_USER}:{CONFIG.DATABASE_PASSWORD}@postgres:5432/{CONFIG.DATABASE_NAME}"
 

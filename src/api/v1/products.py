@@ -5,13 +5,19 @@ from src.services.storage import upload_image, update_image, delete_image
 from src.api.deps import get_db, get_current_user, get_current_admin_user
 from fastapi import APIRouter, Depends, File, HTTPException, status, UploadFile
 
-from src.schemas.product import ProductCreate, ProductOut, ProductUpdate, ProductStockUpdate
+from src.schemas.product import (
+    ProductCreate,
+    ProductOut,
+    ProductUpdate,
+    ProductStockUpdate
+)
 
 from src.db.models.users import User
 from src.db.models.products import Product
 from src.db.models.categories import Category
 
 router = APIRouter(prefix='/products', tags=["products"])
+
 
 @router.get(
     "/",
@@ -46,6 +52,7 @@ async def get_products(
     products = result.scalars().all()
     return products
 
+
 @router.post(
     "/",
     response_model=ProductOut,
@@ -70,7 +77,7 @@ async def create_product(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Category not found."
         )
-    
+
     result = await db.execute(
         select(Product).where(Product.name == payload.name)
     )
@@ -104,8 +111,9 @@ async def create_product(
             status_code=status.HTTP_409_CONFLICT,
             detail="Database integrity error.",
         )
-    
+
     return product
+
 
 @router.patch(
     "/{product_id}",
@@ -128,7 +136,7 @@ async def update_product(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Product not found."
         )
-    
+
     update_data = payload.model_dump(
         exclude_unset=True,
         exclude_none=True
@@ -182,6 +190,7 @@ async def update_product(
 
     return product
 
+
 @router.patch(
     "/{product_id}/stock",
     response_model=ProductOut,
@@ -209,6 +218,7 @@ async def update_product_stock(
 
     return product
 
+
 @router.delete(
     "/{product_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -227,7 +237,7 @@ async def delete_product(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Product not found."
         )
-    
+
     if product.image_public_id:
         await delete_image(product.image_public_id)
 

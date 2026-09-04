@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 from src.db.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+
 class Category(Base):
     __tablename__ = "categories"
 

@@ -9,6 +9,7 @@ from src.core.security import hash_password
 async def initialize_system():
     await create_admin()
 
+
 async def create_admin():
     async with async_session() as session:
         result = await session.execute(

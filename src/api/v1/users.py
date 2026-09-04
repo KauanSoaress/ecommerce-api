@@ -1,5 +1,4 @@
 from sqlalchemy import select
-from sqlite3 import IntegrityError
 from sqlalchemy.exc import IntegrityError
 from src.core.security import hash_password
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +10,7 @@ from src.schemas.user import UserCreate, UserOut, UserUpdate
 from src.db.models.users import User
 
 router = APIRouter(prefix="/users", tags=["users"])
+
 
 @router.post(
     "/",
@@ -33,7 +33,7 @@ async def create_user(
             status_code=409,
             detail="A user with this name already exists."
         )
-    
+
     result = await db.execute(
         select(User).where(User.email == payload.email)
     )
@@ -43,7 +43,7 @@ async def create_user(
             status_code=409,
             detail="A user with this email already exists."
         )
-    
+
     user = User(
         username=payload.username,
         email=payload.email,
@@ -61,10 +61,11 @@ async def create_user(
             status_code=status.HTTP_409_CONFLICT,
             detail="A user with this name or email already exists.",
         )
-    
+
     await db.refresh(user)
 
     return user
+
 
 @router.get(
     "/",
@@ -86,7 +87,7 @@ async def get_users(
 
     if id:
         query = query.where(User.id == id)
-    
+
     if username:
         query = query.where(User.username.ilike(f"%{username}%"))
 
@@ -99,9 +100,13 @@ async def get_users(
     users = result.scalars().all()
     return users
 
+
 @router.get("/me", response_model=UserOut)
-async def get_current_user_profile(current_user: User = Depends(get_current_user)):
+async def get_current_user_profile(
+    current_user: User = Depends(get_current_user)
+):
     return current_user
+
 
 @router.get(
     "/{user_id}",
@@ -124,6 +129,7 @@ async def get_user_by_id(
         )
     return user
 
+
 @router.patch(
     "/{user_id}",
     response_model=UserOut,
@@ -144,7 +150,7 @@ async def update_user_by_id(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found.",
         )
-    
+
     update_data = payload.model_dump(exclude_unset=True)
 
     if "name" in update_data:
@@ -160,7 +166,7 @@ async def update_user_by_id(
                 status_code=409,
                 detail="A user with this name already exists."
             )
-    
+
     if "email" in update_data:
         result = await db.execute(
             select(User).where(
@@ -176,11 +182,13 @@ async def update_user_by_id(
             )
 
     if "password" in update_data:
-        update_data["hashed_password"] = hash_password(update_data.pop("password"))
+        update_data["hashed_password"] = hash_password(
+            update_data.pop("password")
+        )
 
     for field, value in update_data.items():
         setattr(user, field, value)
-    
+
     try:
         await db.commit()
         await db.refresh(user)
@@ -192,6 +200,7 @@ async def update_user_by_id(
         )
 
     return user
+
 
 @router.delete(
     "/{user_id}",

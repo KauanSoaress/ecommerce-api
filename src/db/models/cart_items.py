@@ -7,8 +7,9 @@ if TYPE_CHECKING:
     from src.db.models.products import Product
 
 from src.db.base import Base
-from sqlalchemy import ForeignKey, func
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 
 class CartItem(Base):
     __tablename__ = "cart_items"

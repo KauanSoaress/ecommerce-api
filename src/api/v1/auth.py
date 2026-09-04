@@ -13,6 +13,7 @@ from src.db.models.users import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+
 @router.post("/login", response_model=Token)
 async def login(
     payload: Annotated[
@@ -42,6 +43,7 @@ async def login(
         )
     access_token = create_access_token(data={"sub": str(user.id)})
     return Token(access_token=access_token)
+
 
 @router.post(
     "/register",

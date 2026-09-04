@@ -2,6 +2,7 @@ from src.db.base import Base
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
 
+
 class Coupon(Base):
     __tablename__ = "coupons"
 

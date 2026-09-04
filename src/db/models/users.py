@@ -11,6 +11,7 @@ from datetime import datetime
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+
 class User(Base):
     __tablename__ = "auth_users"
 

@@ -9,6 +9,7 @@ ALLOWED_TYPES = {
     "image/webp"
 }
 
+
 async def upload_image(file: UploadFile) -> str: 
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(
@@ -36,9 +37,11 @@ async def upload_image(file: UploadFile) -> str:
 
     return result['secure_url'], result['public_id']
 
+
 async def update_image(file: UploadFile, old_image_public_id: str) -> tuple[str, str]:
     await delete_image(old_image_public_id)
     return await upload_image(file)
+
 
 async def delete_image(image_public_id: str) -> None:
     try:

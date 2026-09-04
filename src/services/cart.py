@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.db.models.users import User
 from src.db.models.carts import Cart
 
+
 async def get_or_create_cart(
     db: AsyncSession,
     user: User

@@ -14,6 +14,7 @@ from src.db.models.categories import Category
 
 router = APIRouter(prefix='/categories', tags=["categories"])
 
+
 @router.get(
     "/",
     response_model=list[CategoryOut],
@@ -33,7 +34,7 @@ async def get_categories(
 
     if id:
         query = query.where(Category.id == id)
-    
+
     if name:
         query = query.where(Category.name.ilike(f"%{name}%"))
 
@@ -42,6 +43,7 @@ async def get_categories(
     result = await db.execute(query)
     categories = result.scalars().all()
     return categories
+
 
 @router.post(
     "/",
@@ -85,6 +87,7 @@ async def create_category(
 
     return category
 
+
 @router.get(
     "/{category_id}",
     response_model=CategoryOut,
@@ -106,6 +109,7 @@ async def get_category(
         )
 
     return category
+
 
 @router.patch(
     "/{category_id}",
@@ -159,6 +163,7 @@ async def update_category(
 
     return category
 
+
 @router.delete(
     "/{category_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -177,8 +182,10 @@ async def delete_category(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Category not found."
         )
-    
-    result = await db.execute(select(Product).where(Product.category_id == category_id).limit(1))
+
+    result = await db.execute(
+        select(Product).where(Product.category_id == category_id).limit(1)
+    )
     if result.scalar_one_or_none():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

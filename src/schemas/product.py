@@ -2,6 +2,7 @@ from fastapi import Form
 from decimal import Decimal
 from pydantic import BaseModel, Field, HttpUrl, ConfigDict
 
+
 class ProductCreate(BaseModel):
     name: str = Field(
         min_length=2,
@@ -46,6 +47,7 @@ class ProductCreate(BaseModel):
             category_id=category_id,
         )
 
+
 class ProductUpdate(BaseModel):
     name: str | None = Field(
         None,
@@ -73,7 +75,7 @@ class ProductUpdate(BaseModel):
         gt=0,
         description="The ID of the category this product belongs to"
     )
-    
+
     @classmethod
     def as_form(
         cls,
@@ -91,12 +93,14 @@ class ProductUpdate(BaseModel):
             category_id=category_id,
         )
 
+
 class ProductStockUpdate(BaseModel):
     stock: int = Field(
         ...,
         ge=0,
         description="The quantity of the product in stock"
     )
+
 
 class ProductOut(BaseModel):
     id: int
